@@ -1,3 +1,4 @@
+
 DataMentor – AI-Driven Supervised Machine Learning Platform
 Project Overview
 
@@ -59,6 +60,15 @@ Model results & explanations
 Chatbot interaction
 
 are attached in this repository to demonstrate the working functionality and outputs of the system.
+<img width="1920" height="1080" alt="Screenshot 2025-12-01 183817" src="https://github.com/user-attachments/assets/4b741de5-1df5-4b2f-a44f-50c85e53e552" />
+<img width="1920" height="1080" alt="Screenshot 2025-12-04 080148" src="https://github.com/user-attachments/assets/5a248501-9782-447d-a070-cecc2d7cdf87" />
+<img width="1634" height="909" alt="Screenshot 2025-12-04 080240" src="https://github.com/user-attachments/assets/d51632c2-c886-4aa3-ae69-ab4ce70f7abf" />
+<img width="1630" height="934" alt="Screenshot 2025-12-04 080424" src="https://github.com/user-attachments/assets/852d7d68-328d-414d-bf0f-df2c70ca18ae" />
+<img width="1041" height="471" alt="Screenshot 2025-12-04 080446" src="https://github.com/user-attachments/assets/7f822667-f234-4cfe-b8f0-91b3ed91b317" />
+<img width="455" height="588" alt="Screenshot 2025-12-04 110710" src="https://github.com/user-attachments/assets/3e0ba1b9-aeaf-4195-acb8-78c7330d28ac" />
+<img width="492" height="626" alt="Screenshot 2025-12-10 180833" src="https://github.com/user-attachments/assets/3ab5eef8-eebd-42f9-bd3f-46e8e0e2f275" />
+<img width="1920" height="1080" alt="Screenshot 2025-12-15 190504" src="https://github.com/user-attachments/assets/a63341c9-4199-4487-a7c5-910af21d47bf" />
+<img width="1920" height="1080" alt="Screenshot 2025-12-15 190528" src="https://github.com/user-attachments/assets/f316286c-722c-4703-92d6-12ba5c130dc4" />
 
 Project Objective
 
