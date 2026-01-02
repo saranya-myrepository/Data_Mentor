@@ -1,0 +1,393 @@
+<!-- ============================================================ -->
+<!-- 💬 DataMentor Chatbot — FINAL PRO VERSION (No Avatars) -->
+<!-- ============================================================ -->
+
+<div id="chatbot-container" class="chatbot-container">
+  <div class="chatbot-header">
+    <span><i class="fas fa-robot"></i> DataMentor Assistant</span>
+    <button id="chatbot-toggle" class="chatbot-toggle"><i class="fas fa-times"></i></button>
+  </div>
+
+  <!-- Chat Body -->
+  <div class="chatbot-body" id="chatbot-body"></div>
+
+  <!-- Footer -->
+  <div class="chatbot-footer">
+    <input type="text" id="chatbot-input" placeholder="Type your question..." />
+
+    <button id="chatbot-send" class="send-btn">
+      <i class="fas fa-paper-plane"></i>
+    </button>
+
+    <button id="clear-chat" class="small-btn" title="Clear Chat">🧹</button>
+    <button id="download-chat" class="small-btn" title="Download Chat">⬇️</button>
+  </div>
+</div>
+
+<!-- Launcher -->
+<button id="chatbot-launcher" class="chatbot-launcher" style="display:none;">
+  <i class="fas fa-comments"></i>
+</button>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("chatbot-container");
+  const toggleBtn = document.getElementById("chatbot-toggle");
+  const launcher = document.getElementById("chatbot-launcher");
+  const input = document.getElementById("chatbot-input");
+  const send = document.getElementById("chatbot-send");
+  const body = document.getElementById("chatbot-body");
+  const btnClear = document.getElementById("clear-chat");
+  const btnDownload = document.getElementById("download-chat");
+
+  /* ==========================================================
+     1) Restore Chat History (localStorage)
+  ========================================================== */
+  let chatHistory = JSON.parse(localStorage.getItem("dm_chat_history") || "[]");
+
+  function renderHistory() {
+    body.innerHTML = "";
+    chatHistory.forEach(msg => addBubble(msg.text, msg.type, false));
+  }
+  renderHistory();
+
+  /* ==========================================================
+     2) Markdown Parser (Option A)
+  ========================================================== */
+  function parseMarkdown(text) {
+    return text
+      .replace(/^### (.*)$/gim, "<h3>$1</h3>")
+      .replace(/^## (.*)$/gim, "<h2>$1</h2>")
+      .replace(/^# (.*)$/gim, "<h1>$1</h1>")
+      .replace(/\*\*(.*?)\*\*/gim, "<b>$1</b>")
+      .replace(/\*(.*?)\*/gim, "<i>$1</i>")
+      .replace(/^- (.*)$/gim, "<li>$1</li>")
+      .replace(/\n/gim, "<br>");
+  }
+
+  /* ==========================================================
+     3) Add Chat Bubble
+  ========================================================== */
+  function addBubble(text, type, save = true) {
+    const div = document.createElement("div");
+    div.className = `chatbot-message ${type} bubble-anim`;
+
+    let parsed = parseMarkdown(text);
+
+    // Expand/Collapse long messages
+    if (parsed.length > 800 && type === "bot") {
+      const shortText = parsed.slice(0, 700) + "...";
+
+      div.innerHTML = `
+        <div class="bot-scroll"><div class="collapse-text">${shortText}</div></div>
+        <button class="expand-btn">Show more</button>
+      `;
+
+      div.querySelector(".expand-btn").onclick = () => {
+        div.querySelector(".collapse-text").innerHTML = parsed;
+        div.querySelector(".expand-btn").remove();
+      };
+    } 
+    
+    else if (type === "bot") {
+      // Scrollable bot text
+      div.innerHTML = `<div class="bot-scroll">${parsed}
+        <button class="copy-btn">Copy</button>
+      </div>`;
+    } 
+    
+    else {
+      div.innerHTML = parsed;
+    }
+
+    body.appendChild(div);
+    softScroll();
+
+    if (type === "bot") {
+      // copy button
+      const copyBtn = div.querySelector(".copy-btn");
+      if (copyBtn) {
+        copyBtn.addEventListener("click", () => {
+          navigator.clipboard.writeText(text);
+          copyBtn.textContent = "Copied!";
+          setTimeout(() => copyBtn.textContent = "Copy", 1200);
+        });
+      }
+    }
+
+    if (save) {
+      chatHistory.push({ text, type });
+      localStorage.setItem("dm_chat_history", JSON.stringify(chatHistory));
+    }
+  }
+
+  /* ==========================================================
+     4) Typing Animation
+  ========================================================== */
+  function showTyping() {
+    const div = document.createElement("div");
+    div.id = "typing-indicator";
+    div.className = "chatbot-message bot typing-bubble";
+    div.innerHTML = `
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    `;
+    body.appendChild(div);
+    softScroll();
+  }
+
+  function hideTyping() {
+    const ind = document.getElementById("typing-indicator");
+    if (ind) ind.remove();
+  }
+
+  /* ==========================================================
+     5) Smooth Auto Scroll
+  ========================================================== */
+  function softScroll() {
+    body.scrollTo({ top: body.scrollHeight, behavior: "smooth" });
+  }
+
+  /* ==========================================================
+     6) Clear Chat
+  ========================================================== */
+  btnClear.addEventListener("click", () => {
+    if (!confirm("Clear entire chat?")) return;
+
+    chatHistory = [];
+    localStorage.removeItem("dm_chat_history");
+    body.innerHTML = "";
+  });
+
+  /* ==========================================================
+     7) Download Chat (.txt)
+  ========================================================== */
+  btnDownload.addEventListener("click", () => {
+    let text = chatHistory
+      .map(m => `[${m.type.toUpperCase()}] ${m.text}`)
+      .join("\n\n");
+
+    const blob = new Blob([text], { type: "text/plain" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "DataMentor_Chat.txt";
+    link.click();
+  });
+
+  /* ==========================================================
+     8) Open / Close Chat
+  ========================================================== */
+  toggleBtn.addEventListener("click", () => {
+    container.style.display = "none";
+    launcher.style.display = "flex";
+  });
+
+  launcher.addEventListener("click", () => {
+    container.style.display = "flex";
+    launcher.style.display = "none";
+  });
+
+  /* ==========================================================
+     9) Send Message
+  ========================================================== */
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+
+    addBubble(text, "user");
+    input.value = "";
+    showTyping();
+
+    try {
+      const res = await fetch("/chatbot_response", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      });
+
+      const data = await res.json();
+      hideTyping();
+      addBubble(data.reply || "⚠️ Unable to respond.", "bot");
+
+    } catch {
+      hideTyping();
+      addBubble("⚠️ Connection error.", "bot");
+    }
+  }
+
+  send.addEventListener("click", sendMessage);
+  input.addEventListener("keypress", e => {
+    if (e.key === "Enter") sendMessage();
+  });
+
+});
+</script>
+
+
+<!-- ============================================================ -->
+<!-- STYLE SECTION -->
+<!-- ============================================================ -->
+<style>
+.chatbot-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 360px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  z-index: 9999;
+  overflow: hidden;
+  font-size: 16px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chatbot-header {
+  background: #2563eb;
+  color: white;
+  padding: 12px;
+  font-size: 17px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chatbot-body {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+  max-height: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Chat bubbles */
+.chatbot-message {
+  border-radius: 10px;
+  padding: 10px 12px;
+  max-width: 90%;
+  line-height: 1.45;
+}
+
+.chatbot-message.user {
+  background: #dbeafe;
+  align-self: flex-end;
+  text-align: right;
+}
+
+.chatbot-message.bot {
+  background: #eff6ff;
+  align-self: flex-start;
+}
+
+/* Animated bubble appearance */
+.bubble-anim {
+  animation: bubbleFade 0.25s ease-out;
+}
+@keyframes bubbleFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scrollable bot area */
+.bot-scroll {
+  max-height: 190px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+/* Input area */
+.chatbot-footer {
+  display: flex;
+  padding: 8px;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+}
+
+#chatbot-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.send-btn {
+  background: #2563eb;
+  border: none;
+  border-radius: 8px;
+  margin-left: 8px;
+  padding: 0 16px;
+  color: white;
+  cursor: pointer;
+}
+
+.small-btn {
+  margin-left: 8px;
+  padding: 0 11px;
+  background: #e5e7eb;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Copy button */
+.copy-btn {
+  background: #e5e7eb;
+  border: none;
+  font-size: 12px;
+  padding: 3px 6px;
+  border-radius: 5px;
+  margin-top: 8px;
+  cursor: pointer;
+}
+
+/* Typing Animation */
+.typing-bubble {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.typing-bubble .dot {
+  width: 8px;
+  height: 8px;
+  background: #555;
+  border-radius: 50%;
+  animation: blink 1.4s infinite ease-in-out;
+}
+.typing-bubble .dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-bubble .dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes blink {
+  0%,100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* Launcher */
+.chatbot-launcher {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #2563eb;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  color: white;
+  font-size: 24px;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+</style>

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DataMentor - Upload Dataset</title>
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  <!-- FontAwesome (for icons + chatbot widget) -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <style>
+
+    /* -------------------------------------------------------
+       PAGE BASE
+    -------------------------------------------------------- */
+    body {
+      background-color: #f9fafb;
+      font-family: "Inter", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding-bottom: 120px;
+    }
+
+    /* -------------------------------------------------------
+       OUTER OUTLINE FOR CARD
+    -------------------------------------------------------- */
+    .card-outline {
+      border-radius: 18px;
+      padding: 10px;
+      background: linear-gradient(180deg,
+                  rgba(37,99,235,0.05),
+                  rgba(37,99,235,0.02));
+      box-shadow: 0 10px 30px rgba(30,58,138,0.04);
+      max-width: 640px;
+      width: 100%;
+      margin-top: 60px;
+    }
+
+    /* -------------------------------------------------------
+       MAIN WHITE CARD
+    -------------------------------------------------------- */
+    .upload-card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      padding: 26px 28px;
+      width: 100%;
+      max-width: 620px;
+      position: relative;
+    }
+
+    .card-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+
+    /* -------------------------------------------------------
+       DRAG + DROP AREA
+    -------------------------------------------------------- */
+    .file-drop-area {
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 28px 18px;
+      text-align: center;
+      cursor: pointer;
+      color: #6b7280;
+      transition: all 0.3s ease;
+    }
+
+    .file-drop-area:hover {
+      border-color: #2563eb;
+      background-color: #f5f9ff;
+      color: #2563eb;
+    }
+
+    .file-drop-area i {
+      font-size: 30px;
+      margin-bottom: 10px;
+      color: #2563eb;
+    }
+
+    .file-input { display: none; }
+
+
+    /* -------------------------------------------------------
+       SUCCESS MESSAGE
+    -------------------------------------------------------- */
+    .success-indicator {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: #ecfdf5;
+      border: 1px solid #10b981;
+      color: #047857;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      animation: fadeIn 0.35s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+
+    /* -------------------------------------------------------
+       FORM ELEMENTS
+    -------------------------------------------------------- */
+    select, textarea {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #111827;
+      margin-top: 8px;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 14px;
+      color: #1f2937;
+      margin-top: 16px;
+      display: block;
+    }
+
+    .optional {
+      font-size: 13px;
+      color: #6b7280;
+      margin-left: 4px;
+    }
+
+    /* -------------------------------------------------------
+       SUBMIT BUTTON
+    -------------------------------------------------------- */
+    .cta-button {
+      width: 100%;
+      background-color: #2563eb;
+      color: white;
+      padding: 14px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 24px;
+      cursor: pointer;
+    }
+
+    /* -------------------------------------------------------
+       INSTRUCTION BOX
+    -------------------------------------------------------- */
+    .info-box {
+      background: linear-gradient(180deg,#fbfdff,#f2f8ff);
+      border: 1.6px solid rgba(37,99,235,0.18);
+      padding: 14px;
+      font-size: 14px;
+      color: #0f1724;
+      border-radius: 10px;
+      margin-bottom: 14px;
+    }
+
+    .info-box ul {
+      margin: 6px 0 0 18px;
+      padding: 0;
+      color: #374151;
+      line-height: 1.45;
+    }
+
+
+    /* -------------------------------------------------------
+       FETCHED COLUMN NAMES DISPLAY
+    -------------------------------------------------------- */
+    .columns-list {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .col-pill {
+      background: #ffffff;
+      border: 1px solid rgba(37,99,235,0.2);
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .col-pill button {
+      background: none;
+      border: none;
+      color: #2563eb;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .copy-all {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      background:#eef6ff;
+      border:1px solid rgba(37,99,235,0.18);
+      color:#2563eb;
+      padding:8px 12px;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
+      margin-top: 8px;
+    }
+
+    /* -------------------------------------------------------
+       PREVIEW TABLE BOX
+    -------------------------------------------------------- */
+    .preview-container {
+      display: none;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 14px;
+      overflow-x: auto;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <main>
+
+    <div class="card-outline">
+      <div class="upload-card">
+
+        <h1 class="card-title">Upload Your Dataset</h1>
+        <p class="subtitle">Supports CSV/Excel files (max 1000 rows)</p>
+
+        <!-- ---------------------- -->
+        <!--  INSTRUCTION BOX        -->
+        <!-- ---------------------- -->
+        <div class="info-box">
+          <strong>How column detection & help works</strong>
+          <ul>
+            <li>When you upload a dataset, we automatically fetch column names for you.</li>
+            <li>You can copy any column name using the copy buttons.</li>
+            <li>You can also copy ALL column names at once.</li>
+            <li>Your dataset may exceed 1000 rows, but only the first 1000 are processed.</li>
+            <li>If dataset has <strong>less than 3 columns</strong>, the pipeline cannot run.</li>
+            <li>Extremely wide datasets (50+ columns) may slow processing.</li>
+            <li>Ensure one column clearly represents your target variable.</li>
+            <li>If unsure, describe your business objective & ask the chatbot for help.</li>
+          </ul>
+        </div>
+
+
+        <!-- ---------------------- -->
+        <!--  FORM START             -->
+        <!-- ---------------------- -->
+        <form id="uploadForm" method="POST" action="{{ url_for('upload_data') }}" enctype="multipart/form-data">
+
+          <!-- Upload -->
+          <label>Dataset File</label>
+          <div class="file-drop-area" id="drop-area">
+            <i class="fas fa-upload"></i><br>
+            Drag & drop file or click to browse
+            <input type="file" id="dataset" name="dataset" class="file-input" accept=".csv,.xlsx" required>
+          </div>
+
+          <div id="success-box" class="success-indicator">
+            <i class="fas fa-check-circle"></i> Dataset uploaded successfully!
+          </div>
+
+          <!-- Target variable -->
+          <label for="target_column">Target Variable</label>
+          <select id="target_column" name="target_column" required>
+            <option value="">Select target variable...</option>
+          </select>
+
+          <!-- fetched columns -->
+          <div id="fetched-section" style="display:none; margin-top:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-weight:700;">Fetched column names</span>
+              <button type="button" id="copyAllBtn" class="copy-all">
+                <i class="fas fa-copy"></i> Copy all
+              </button>
+            </div>
+
+            <div class="columns-list" id="columns-list"></div>
+          </div>
+
+          <!-- Description -->
+          <label for="data_description">
+            Dataset Description <span class="optional">(optional)</span>
+          </label>
+          <textarea id="data_description" name="data_description" rows="2"></textarea>
+
+          <!-- Problem type -->
+          <label for="problem_type">Supervised Problem Type</label>
+          <select id="problem_type" name="problem_type" required>
+            <option value="">Select problem type...</option>
+
+            <optgroup label="Classification">
+              <option value="binary_classification">Binary Classification</option>
+              <option value="multiclass_classification">Multiclass Classification</option>
+              <option value="ordinal_classification">Ordinal Classification</option>
+              <option value="imbalanced_classification">Imbalanced Classification</option>
+              <option value="multi_label_classification">Multi-Label Classification</option>
+            </optgroup>
+
+            <optgroup label="Regression">
+              <option value="simple_regression">Simple Regression</option>
+              <option value="multiple_regression">Multiple Regression</option>
+              <option value="polynomial_regression">Polynomial Regression</option>
+              <option value="ridge_regression">Ridge Regression</option>
+              <option value="lasso_regression">Lasso Regression</option>
+              <option value="ensemble_regression">Ensemble Regression</option>
+            </optgroup>
+          </select>
+
+          <!-- Copy problem types -->
+          <button type="button" id="copyProblemTypes" class="copy-all">
+            <i class="fas fa-copy"></i> Copy all problem types
+          </button>
+
+          <!-- Business Objective (REQUIRED) -->
+          <label for="business_objective">Business Objective</label>
+          <textarea id="business_objective" name="business_objective" rows="2" required></textarea>
+
+          <!-- Preview -->
+          <div class="preview-container" id="preview-container">
+            <h4>Dataset Preview:</h4>
+            <div id="preview-table"></div>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="cta-button">Start Analysis</button>
+
+        </form>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    © 2025 DataMentor — Empowering Supervised Learning
+  </footer>
+
+  {% include 'chatbot_widget.html' %}
+
+  <!-- -------------------------------------------------------
+       JAVASCRIPT HANDLERS
+  -------------------------------------------------------- -->
+  <script>
+
+    const fileInput = document.getElementById("dataset");
+    const dropArea = document.getElementById("drop-area");
+    const successBox = document.getElementById("success-box");
+    const previewContainer = document.getElementById("preview-container");
+    const previewTable = document.getElementById("preview-table");
+
+    const fetchedSection = document.getElementById("fetched-section");
+    const columnsList = document.getElementById("columns-list");
+    const copyAllBtn = document.getElementById("copyAllBtn");
+    const targetSelect = document.getElementById("target_column");
+
+    dropArea.addEventListener("click", () => fileInput.click());
+
+    /* -------------------------------------------------------
+       FILE UPLOAD -> FETCH COLUMNS
+    -------------------------------------------------------- */
+    fileInput.addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("dataset", file);
+
+      try {
+        const res = await fetch("/get_columns", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+
+        successBox.style.display = "block";
+
+        /* Fill target select */
+        targetSelect.innerHTML = '<option value="">Select target variable...</option>';
+        data.columns.forEach(col => {
+          const opt = document.createElement("option");
+          opt.value = col;
+          opt.textContent = col;
+          targetSelect.appendChild(opt);
+        });
+
+        /* Build pills */
+        columnsList.innerHTML = "";
+        data.columns.forEach(col => {
+          const pill = document.createElement("div");
+          pill.className = "col-pill";
+          pill.innerHTML = `
+            <span class="col-name">${col}</span>
+            <button class="copy-col" data-col="${col}">
+              <i class="fas fa-copy"></i>
+            </button>
+          `;
+          columnsList.appendChild(pill);
+        });
+
+        fetchedSection.style.display = data.columns.length ? "block" : "none";
+
+        /* preview */
+        if (data.preview_html) {
+          previewContainer.style.display = "block";
+          previewTable.innerHTML = data.preview_html;
+        } else {
+          previewContainer.style.display = "none";
+        }
+
+        /* Copy individual column */
+        document.querySelectorAll(".copy-col").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            const col = e.currentTarget.getAttribute("data-col");
+            navigator.clipboard.writeText(col); 
+            e.currentTarget.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => {
+              e.currentTarget.innerHTML = '<i class="fas fa-copy"></i>';
+            }, 1200);
+          });
+        });
+
+      } catch (error) {
+        console.error(error);
+        alert("Unable to read file. Try again.");
+      }
+    });
+
+    /* -------------------------------------------------------
+       COPY ALL COLUMNS
+    -------------------------------------------------------- */
+    copyAllBtn.addEventListener("click", () => {
+      const cols = Array.from(document.querySelectorAll(".col-pill .col-name"))
+                        .map(x => x.textContent.trim());
+      const text = cols.join(", ");
+      navigator.clipboard.writeText(text);
+      copyAllBtn.innerHTML = '<i class="fas fa-check"></i> Copied';
+      setTimeout(() => {
+        copyAllBtn.innerHTML = '<i class="fas fa-copy"></i> Copy all';
+      }, 1500);
+    });
+
+    /* -------------------------------------------------------
+       COPY ALL PROBLEM TYPES (FIXED)
+    -------------------------------------------------------- */
+    document.getElementById("copyProblemTypes")
+      .addEventListener("click", () => {
+
+        const select = document.getElementById("problem_type");
+
+        /* FIXED: include all real options (ignore placeholder only) */
+        const items = Array.from(select.options)
+          .filter(o => o.value && o.value !== "")   // only real problem types
+          .map(o => o.textContent.trim());
+
+        const text = items.join(", ");
+
+        navigator.clipboard.writeText(text);
+
+        const btn = document.getElementById("copyProblemTypes");
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+        setTimeout(() => {
+          btn.innerHTML = '<i class="fas fa-copy"></i> Copy all problem types';
+        }, 1600);
+    });
+
+  </script>
+
+</body>
+</html>

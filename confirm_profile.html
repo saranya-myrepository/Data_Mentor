@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DataMentor - Data Profiling Overview</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <style>
+    :root {
+      --primary-blue:#2563eb;
+      --hover-blue:#1e40af;
+      --page-bg:#f8fafc;
+      --card-bg:#ffffff;
+      --text-dark:#0f172a;
+      --text-muted:#6b7280;
+      --border-light:#e5e7eb;
+      --success-green:#10b981;
+      --shadow-light: 0 4px 20px rgba(2,6,23,0.06);
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--page-bg);
+      font-family: "Inter", sans-serif;
+      color: var(--text-dark);
+      font-size: 17px;
+    }
+
+    .navbar {
+      background: linear-gradient(90deg, #1e3a8a, var(--primary-blue));
+      padding: 22px 50px;
+      color: white;
+      font-size: 20px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .main-card {
+      max-width: 1200px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 14px;
+      padding: 45px;
+      box-shadow: var(--shadow-light);
+    }
+
+    h1.card-title {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--primary-blue);
+    }
+
+    h2.section-title {
+      font-size: 26px;
+      margin-top: 45px;
+      margin-bottom: 18px;
+      font-weight: 800;
+      color: #1e3a8a;
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+
+    .section-box {
+      background: #fafdff;
+      border-radius: 12px;
+      border:1px solid var(--border-light);
+      padding: 25px;
+      font-size: 17px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 18px;
+      font-size: 17px;
+    }
+
+    th, td {
+      padding: 14px;
+      border:1px solid #e2e8f0;
+      text-align:left;
+    }
+
+    th {
+      background:#f3f4f6;
+      font-size: 17px;
+      font-weight:700;
+    }
+
+    .chart-container {
+      background:white;
+      border-radius:12px;
+      border:1px solid #e2e8f0;
+      padding:25px;
+      margin-top:25px;
+    }
+
+    .reason-card {
+      background:#f1f5f9;
+      border-left:6px solid var(--primary-blue);
+      padding:18px;
+      border-radius:10px;
+      margin-top:18px;
+      font-size:19px;
+      line-height:1.6;
+    }
+
+    .weak-note {
+      background:#f8fafc;
+      border-left:6px solid #94a3b8;
+      padding:14px;
+      border-radius:10px;
+      margin-top:16px;
+    }
+
+    .small-select {
+      padding: 10px;
+      border-radius: 8px;
+      border:1px solid #cbd5e1;
+      font-size: 17px;
+    }
+
+    .action-btn {
+      background: var(--primary-blue);
+      color:white;
+      padding:12px 22px;
+      font-size:17px;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      margin-top:12px;
+    }
+
+    .footer {
+      text-align:center;
+      padding:25px;
+      color:#6b7280;
+      margin-top:40px;
+    }
+
+    .controls-row {
+      display:flex;
+      gap:16px;
+      margin-top:20px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+  </style>
+</head>
+
+<body>
+  
+<header class="navbar">
+  <div>DataMentor</div>
+  <div><i class="fas fa-robot"></i> Intelligent Profiling Dashboard</div>
+</header>
+
+<main class="main-card">
+
+  <h1 class="card-title"><i class="fas fa-database"></i> Dataset Profiling Overview</h1>
+
+  <!-- DATASET SUMMARY -->
+  <h2 class="section-title"><i class="fas fa-table"></i> Dataset Summary</h2>
+
+  <div class="section-box">
+    <strong>Target:</strong> {{ user_inputs.target_column }} &nbsp; | &nbsp;
+    <strong>Problem:</strong> {{ user_inputs.problem_type|capitalize }} &nbsp; | &nbsp;
+    <strong>Rows:</strong> {{ report.general_stats.total_rows_after_target_check }} &nbsp; | &nbsp;
+    <strong>Columns:</strong> {{ report.general_stats.total_columns }}
+  </div>
+
+  <!-- MISSING VALUE INSIGHTS -->
+  <h2 class="section-title"><i class="fas fa-exclamation-circle"></i> Missing Value Insights</h2>
+
+  <div class="section-box">
+
+    {% set has_missing = false %}
+    {% for col, data in report.feature_profiles.items() %}
+      {% if data.missing_pct > 0 %}
+        {% set has_missing = true %}
+      {% endif %}
+    {% endfor %}
+
+    {% if not has_missing %}
+      <p>No missing values detected.</p>
+    {% else %}
+
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Missing (%)</th>
+          <th>Missing Type</th>
+          <th>Reason</th>
+          <th>Recommended Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for col, data in report.feature_profiles.items() %}
+        {% if data.missing_pct > 0 %}
+        {% set minfo = report.missing_type_info.get(col, {}) %}
+
+        <tr>
+          <td>{{ col }}</td>
+          <td>{{ data.missing_pct }}%</td>
+          <td>{{ minfo.missing_type if minfo else "Unknown" }}</td>
+          <td>{{ minfo.reason if minfo else "Automatically detected" }}</td>
+          <td>
+            {% if data.missing_pct > 50 %} Remove
+            {% elif data.missing_pct > 20 %} Review
+            {% else %} Impute
+            {% endif %}
+          </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% endif %}
+
+    <!-- Missing Imputation -->
+    <div class="controls-row">
+      <label>Impute using:</label>
+      <select id="impute-method" class="small-select">
+        <option value="mean">Mean</option>
+        <option value="median">Median</option>
+        <option value="mode">Mode</option>
+        <option value="knn">KNN</option>
+      </select>
+
+      <form method="POST" action="{{ url_for('apply_imputation', session_id=session_id) }}">
+        <input type="hidden" name="method" id="impute-method-hidden" value="mean">
+        <button class="action-btn" style="background:#059669;">
+          <i class="fas fa-download"></i> Apply & Download Imputed CSV
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- OUTLIER INSIGHTS -->
+  <h2 class="section-title"><i class="fas fa-bullseye"></i> Outlier Insights</h2>
+
+  <div class="section-box">
+
+    {% set has_outliers = false %}
+    {% for col, data in report.feature_profiles.items() %}
+      {% if data.outlier_pct > 0 %}
+        {% set has_outliers = true %}
+      {% endif %}
+    {% endfor %}
+
+    {% if not has_outliers %}
+      <p>No outliers detected in this dataset.</p>
+    {% else %}
+
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Outlier (%)</th>
+          <th>Detection Type</th>
+          <th>Origin Type</th>
+          <th>Reason</th>
+          <th>Suggested Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for col, data in report.feature_profiles.items() %}
+        {% if data.outlier_pct > 0 %}
+        {% set oinfo = report.outlier_type_info.get(col, {}) %}
+
+        <tr>
+          <td>{{ col }}</td>
+          <td>{{ data.outlier_pct }}%</td>
+          <td>{{ oinfo.detection_type if oinfo else "IQR" }}</td>
+          <td>{{ oinfo.origin_type if oinfo else "Unknown" }}</td>
+          <td>{{ oinfo.reasons if oinfo else "Automatic" }}</td>
+          <td>
+            {% if oinfo.origin_type == "Erroneous" %} Clean
+            {% elif data.outlier_pct > 10 %} Remove / Winsorize
+            {% else %} Monitor
+            {% endif %}
+          </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% endif %}
+
+    <!-- Outlier Handling -->
+    <div class="controls-row">
+      <label>Handle outliers:</label>
+      <select id="outlier-strategy" class="small-select">
+        <option value="cap">Cap</option>
+        <option value="remove_extreme">Remove Extreme</option>
+        <option value="transform">Transform</option>
+      </select>
+
+      <form method="POST" action="{{ url_for('apply_outlier_handling', session_id=session_id) }}">
+        <input type="hidden" name="strategy" id="outlier-strategy-hidden" value="cap">
+        <button class="action-btn" style="background:#f97316;">
+          <i class="fas fa-download"></i> Apply & Download Cleaned CSV
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- CORRELATION -->
+  <h2 class="section-title"><i class="fas fa-link"></i> Correlation Insights</h2>
+
+  <table>
+    <thead>
+      <tr><th>Feature</th><th>Correlation</th><th>Meaning</th></tr>
+    </thead>
+    <tbody>
+      {% for col, val in report.correlation_summary.items() %}
+      {% if col != user_inputs.target_column %}
+      <tr>
+        <td>{{ col }}</td>
+        <td>{{ "%.3f"|format(val) }}</td>
+        <td>
+          {% if val|abs >= 0.85 %} Highly Correlated
+          {% elif val|abs >= 0.4 %} Moderate
+          {% else %} Weak
+          {% endif %}
+        </td>
+      </tr>
+      {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="chart-container">
+    {{ correlation_html | safe }}
+  </div>
+
+  <div style="text-align:right;">
+    <a href="{{ url_for('download_correlation_map', session_id=session_id) }}" class="action-btn">
+      <i class="fas fa-download"></i> Download Correlation Map
+    </a>
+  </div>
+
+  <!-- FEATURE ENGINEERING -->
+  <h2 class="section-title"><i class="fas fa-tools"></i> Feature Engineering</h2>
+
+  <div class="section-box">
+    <table>
+      <thead>
+        <tr><th>Feature</th><th>Recommended Engineering</th></tr>
+      </thead>
+      <tbody>
+        {% for col, data in report.feature_profiles.items() %}
+        <tr>
+          <td>{{ col }}</td>
+          <td>
+            {% set eng = [] %}
+            {% if data.dtype.startswith("float") or data.dtype.startswith("int") %}
+              {% if data.outlier_pct > 5 %} {% set _ = eng.append("Winsorize / Scale") %}{% endif %}
+              {% if data.stats.mean and data.stats.mean > 0 %} {% set _ = eng.append("Log Transform") %}{% endif %}
+            {% else %}
+              {% if data.unique_count > 40 %} {% set _ = eng.append("Target Encoding") %}{% endif %}
+              {% if data.unique_count <= 10 %} {% set _ = eng.append("One-Hot Encoding") %}{% endif %}
+            {% endif %}
+            {% if data.missing_pct > 0 %} {% set _ = eng.append("Impute") %}{% endif %}
+            {% if eng|length == 0 %}
+              No major transformation needed.
+            {% else %}
+              {{ eng | join(', ') }}
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FEATURE PLOTS -->
+  <h2 class="section-title"><i class="fas fa-chart-bar"></i> Detailed Feature Profiling</h2>
+
+  {% for col, plot_html in feature_plots.items() %}
+
+  <div class="chart-container">
+    <h3 style="font-size:22px; margin-bottom:12px;">{{ col }}</h3>
+    <div>{{ plot_html | safe }}</div>
+
+    {% set interp = report.feature_profiles[col].interpretation %}
+    <div class="reason-card">
+      <strong>Reason:</strong><br>
+      {% if interp.reason %}
+        {% for r in interp.reason %}
+        <div>- {{ r }}</div>
+        {% endfor %}
+      {% else %}
+        <div>Automatically interpreted.</div>
+      {% endif %}
+      <div style="margin-top:10px;"><strong>Action:</strong> {{ interp.action }}</div>
+    </div>
+
+    {% set corr = report.correlation_summary.get(col, 0) %}
+    {% if corr|abs >= 0.85 %}
+      <p class="reason-card" style="border-left-color:#b91c1c;">Highly correlated — may cause multicollinearity.</p>
+    {% elif corr|abs >= 0.4 %}
+      <p class="reason-card" style="border-left-color:#10b981;">Moderate correlation — useful for modeling.</p>
+    {% else %}
+      <p class="weak-note">Weak correlation — but patterns may still exist.</p>
+    {% endif %}
+
+  </div>
+
+  {% endfor %}
+
+  <!-- PIPELINE BUTTONS -->
+  <div style="margin-top:40px; display:flex; gap:16px; flex-wrap:wrap;">
+    
+    <!-- Download preprocessed data -->
+    <form method="POST" action="/preprocess_only/{{ session_id }}">
+      <button class="action-btn">
+        <i class="fas fa-download"></i> Click here to download the preprocessed data
+      </button>
+    </form>
+
+    <!-- FIXED PIPELINE ROUTE (old: /ml_pipeline ❌) -->
+    <a href="/ml_pipeline_upload">
+      <button class="action-btn" style="background:#16a34a;">
+        <i class="fas fa-play-circle"></i> Run Full ML Pipeline
+      </button>
+    </a>
+
+  </div>
+
+</main>
+
+<center>
+  <a href="{{ url_for('upload_form') }}" class="back-btn">Back</a>
+</center>
+
+<footer class="footer">
+  © 2025 DataMentor — Automated Insights & Model Intelligence
+</footer>
+
+{% include 'chatbot_widget.html' %}
+
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Profiling Report</title>
+<style>
+  body { font-family: Helvetica; font-size: 14px; }
+  h1 { font-size: 22px; color: #2563eb; }
+  h2 { font-size: 18px; margin-top: 16px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { border: 1px solid #ccc; padding: 6px; }
+  th { background: #f3f4f6; }
+</style>
+</head>
+
+<body>
+<h1>Dataset Profiling Summary</h1>
+
+<h2>General Info</h2>
+<ul>
+  <li>Total Rows: {{ report.general_stats.total_rows_after_target_check }}</li>
+  <li>Total Columns: {{ report.general_stats.total_columns }}</li>
+</ul>
+
+<h2>Missing Value Summary</h2>
+<table>
+<thead><tr><th>Feature</th><th>Missing %</th></tr></thead>
+<tbody>
+{% for col, data in report.feature_profiles.items() %}
+<tr>
+  <td>{{ col }}</td>
+  <td>{{ data.missing_pct }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h2>Outlier Summary</h2>
+<table>
+<thead><tr><th>Feature</th><th>Outlier %</th></tr></thead>
+<tbody>
+{% for col,data in report.feature_profiles.items() %}
+<tr>
+  <td>{{ col }}</td>
+  <td>{{ data.outlier_pct }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+</body>
+</html>

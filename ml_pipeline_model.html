@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.container {
+    max-width: 1150px;
+    margin: 50px auto;
+}
+
+.step-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 22px;
+}
+
+.info-box {
+    background: #e8f3ff;
+    border-left: 6px solid #2563eb;
+    padding: 20px 22px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    color: #1e3a8a;
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    padding: 26px;
+    margin-bottom: 35px;
+}
+
+.table th {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.table td {
+    font-size: 16px;
+}
+
+.badge-best {
+    background: #16a34a;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.badge-better {
+    background: #2563eb;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.badge-good {
+    background: #64748b;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.badge-recommended {
+    background: #f59e0b;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-left: 8px;
+}
+
+.form-check-label {
+    font-size: 17px;
+    margin-left: 6px;
+}
+
+.btn-primary {
+    background: #2563eb;
+    border: none;
+    padding: 15px 24px;
+    font-size: 18px;
+    border-radius: 14px;
+    color: white;
+    width: 100%;
+    font-weight: 700;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+}
+</style>
+
+<div class="container">
+
+    <div class="step-title">
+        ML Pipeline — Step 3: Model Selection & AutoML Ranking
+    </div>
+
+    <div class="info-box">
+        AutoML evaluated all suitable models and ranked them using
+        <b>{{ "Accuracy" if task == "classification" else "R² Score" }}</b>.
+        <br><br>
+        You may proceed with the best recommended model or manually select
+        up to <b>3 models</b> for deeper evaluation.
+    </div>
+
+    <!-- ================= AUTO ML LEADERBOARD ================= -->
+    <div class="card">
+        <h4 style="font-size:22px;font-weight:700;">AutoML Model Ranking</h4>
+
+        <table class="table table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Model</th>
+                    <th>Score</th>
+                    <th>Evaluation</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in leaderboard %}
+                <tr>
+                    <td><b>{{ loop.index }}</b></td>
+                    <td>{{ row.name }}</td>
+                    <td>{{ row.score }}</td>
+                    <td>
+                        {% if loop.index == 1 %}
+                            <span class="badge-best">Best</span>
+                        {% elif loop.index == 2 %}
+                            <span class="badge-better">Better</span>
+                        {% elif loop.index == 3 %}
+                            <span class="badge-good">Good</span>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ================= MANUAL MODEL SELECTION ================= -->
+    <form method="POST">
+
+        <div class="card">
+            <h4 style="font-size:22px;font-weight:700;">Choose Models Manually (Max 3)</h4>
+
+            {% if error %}
+            <div class="alert alert-danger mt-3">{{ error }}</div>
+            {% endif %}
+
+            <h5 class="mt-4">Top-3 Models</h5>
+            {% for model in model_groups["Top-3 Recommended"] %}
+                <div class="form-check mt-2">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="models_selected"
+                           value="{{ model }}">
+                    <label class="form-check-label">
+                        {{ model }}
+                        {% if loop.index == 1 %}
+                            <span class="badge-recommended">Best Model</span>
+                        {% endif %}
+                    </label>
+                </div>
+            {% endfor %}
+
+            <h5 class="mt-4">Other Models</h5>
+            {% for model in model_groups["Basic Models"] %}
+                <div class="form-check mt-2">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="models_selected"
+                           value="{{ model }}">
+                    <label class="form-check-label">
+                        {{ model }}
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn-primary mt-4">
+            Continue →
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

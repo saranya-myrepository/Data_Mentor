@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>DataMentor - Intelligent Assistance</title>
+
+  <!-- keep existing CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  <!-- fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+
+  <style>
+    :root{
+      --dark-blue: #1e3a8a;
+      --mid-blue: #2563eb;
+      --sky-bg: #f3f8ff;
+      --box-border: #1e3a8a;
+      --muted: #374151;
+    }
+
+    html,body{height:100%; margin:0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color:#111827; background:#fff;}
+
+    header{
+      background:var(--dark-blue);
+      color:white;
+      padding:14px 36px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-weight:600;
+      letter-spacing:0.2px;
+    }
+
+    .logo{
+      font-weight:900;
+      font-size: 26px;   /* increased size */
+      letter-spacing: 0.8px;
+    }
+
+    .hero{padding:90px 18px 46px; text-align:center;}
+    .hero h1{font-family:'Poppins',sans-serif; color:var(--dark-blue); font-size:46px; margin:0 0 10px 0; font-weight:800;}
+    .hero p{max-width:920px; margin:0 auto 20px; color:var(--muted); font-size:17px; line-height:1.65;}
+
+    .cta-button{
+      display:inline-block;
+      background:var(--mid-blue);
+      color:white;
+      padding:16px 38px;        /* increased padding = bigger button */
+      border-radius:12px;
+      text-decoration:none;
+      font-weight:700;
+      font-size:18px;           /* increased text size */
+      box-shadow:0 8px 18px rgba(37,99,235,0.25);
+      transition:all .25s ease;
+    }
+
+    .cta-button:hover{
+      transform:translateY(-3px); 
+      background:#1d4ed8;
+    }
+
+    /* unified section title style (except hero) */
+    .section-title {
+      color:var(--dark-blue);
+      font-family:'Poppins',sans-serif;
+      font-size:20px; /* equal title size for all sections */
+      font-weight:700;
+      text-align:center;
+      margin: 0 0 18px 0;
+    }
+
+    /* box shared style */
+    .box {
+      background: linear-gradient(180deg,#ffffff 0%, #f8fbff 100%);
+      border: 2px solid var(--box-border);
+      border-radius:12px;
+      box-shadow:0 6px 20px rgba(30,58,138,0.06);
+      padding:22px;
+      margin:28px auto;
+      max-width:1000px;
+    }
+
+    /* slightly larger spacing inside boxes */
+    .box .content { padding-top:8px; color:var(--muted); font-size:15.5px; line-height:1.76; }
+
+    /* features */
+    .features-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:22px; margin-top:8px; max-width:980px; margin-left:auto; margin-right:auto;}
+    .feature { border:2px solid var(--box-border); background:linear-gradient(180deg,#fff,#f7fbff); border-radius:10px; padding:18px; text-align:center; transition:transform .18s; }
+    .feature:hover{ transform:translateY(-6px); box-shadow:0 10px 26px rgba(30,58,138,0.08); }
+    .feature .ico{ color:var(--mid-blue); font-size:28px; }
+    .feature .ftitle{ font-family:'Poppins',sans-serif; color:var(--dark-blue); font-weight:700; margin-top:8px; font-size:15px; }
+    .feature .ftext{ color:var(--muted); font-size:13.5px; margin-top:8px; }
+
+    /* flowchart */
+    .flow-wrap { padding:12px; border-radius:8px; background:linear-gradient(180deg,#fff,#f6fbff); border:1px solid rgba(30,58,138,0.12); }
+
+    /* core steps list spacing */
+    .core-list{ margin-top:10px; color:var(--muted); font-size:15.5px; line-height:1.9; padding-left:18px; }
+
+    /* credits */
+    .credits { text-align:center; margin:44px auto 88px; max-width:900px; }
+    .faculty {
+      font-family:'Merriweather', serif;
+      color:var(--dark-blue);
+      font-weight:700;
+      font-size:20px;
+      margin-bottom:12px;
+    }
+
+    .divider-line {
+      width:220px;
+      height:2px;
+      background:linear-gradient(90deg, rgba(30,58,138,0.1), var(--dark-blue) 20%, var(--dark-blue) 80%, rgba(30,58,138,0.07));
+      margin: 8px auto 10px;
+      border-radius:2px;
+    }
+
+    .developed {
+      font-family:'Poppins',sans-serif;
+      font-weight:800;
+      font-size:20px;
+      color:#0b0b0b;
+      margin: 10px 0 8px 0;
+    }
+
+    .students { font-size:17px; font-weight:700; color:var(--dark-blue); margin-top:6px; }
+    .students .sep { color:#c7cddf; padding: 0 12px; }
+
+    /* increased overall spacing between sections to improve breathing room */
+    main > section, main > div.box { margin-top:36px; margin-bottom:36px; }
+
+    /* responsive */
+    @media (max-width:760px){
+      .hero h1{font-size:34px;}
+      .section-title{font-size:18px;}
+      .faculty{font-size:18px;}
+      .developed{font-size:18px;}
+      .students{font-size:15px;}
+      .box{padding:16px;}
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo">DATAMENTOR</div>
+    <div style="font-size:13px; color:#cfe0ff;">Unleash the Power of Data</div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <h1>Welcome to DataMentor</h1>
+      <p>
+        Upload your dataset and let DataMentor automatically analyze, clean, and interpret your data —
+        with clear, beginner-friendly explanations and a polished, downloadable professional report.
+      </p>
+      <a class="cta-button" href="{{ url_for('upload_form') }}">Start Your Analysis</a>
+    </section>
+
+    <!-- WHAT IS DATAMENTOR -->
+    <div class="box" role="region" aria-label="What is DataMentor">
+      <div class="section-title">What is DataMentor?</div>
+      <div class="content">
+        <ol style="margin:6px 0 0 18px; padding:0;">
+          <li>End-to-end AI platform guiding users through building, testing, and documenting ML workflows.</li>
+          <li>Automatic data profiling to reveal missing values, outliers and feature relationships.</li>
+          <li>Automated preprocessing: encoding, scaling, imputation and reproducible splitting.</li>
+          <li>Auto-suggests models based on dataset characteristics and target objective.</li>
+          <li>Trains and compares models with clear metrics and visualizations for transparency.</li>
+          <li>Provides SHAP and feature-importance visual summaries where applicable.</li>
+          <li>Generates a professional PDF report with executive summary and recommendations.</li>
+          <li>Beginners get a friendly narrative; advanced users get reproducible artifacts.</li>
+          <li>Emphasizes practical reuse: pipeline files and downloadable model artifacts.</li>
+          <li>Acts as a personal ML assistant that bridges learning to production-ready outputs.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- KEY FEATURES -->
+    <section style="max-width:1100px; margin:0 auto;">
+      <div class="section-title">Key Features</div>
+
+      <div class="features-grid">
+        <div class="feature" title="Profile & Analyze">
+          <div class="ico"><i class="fas fa-chart-line"></i></div>
+          <div class="ftitle">Profile & Analyze</div>
+          <div class="ftext">Automatic data profiling: missing values, outliers and correlations explained simply.</div>
+        </div>
+
+        <div class="feature" title="Automate Preprocessing">
+          <div class="ico"><i class="fas fa-cogs"></i></div>
+          <div class="ftitle">Automate Preprocessing</div>
+          <div class="ftext">Encoding, scaling, imputation, and split—reproducible pipelines without manual work.</div>
+        </div>
+
+        <div class="feature" title="Explain with Chatbot">
+          <div class="ico"><i class="fas fa-robot"></i></div>
+          <div class="ftitle">Explain with Chatbot</div>
+          <div class="ftext">Ask explanations about steps, metrics and visuals in plain language.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Flowchart -->
+    <section style="max-width:1200px; margin:30px auto;">
+      <div class="section-title">Flowchart: How DataMentor Works</div>
+      <div class="box flow-wrap" role="region" aria-label="Flowchart">
+        <img src="{{ url_for('static', filename='images/flowchart.png') }}" alt="Flowchart" style="width:100%; border-radius:8px;">
+      </div>
+    </section>
+
+    <!-- CORE STEPS -->
+    <div class="box" role="region" aria-label="Core Steps">
+      <div class="section-title">Core Steps Inside DataMentor</div>
+      <div class="content">
+        <ul class="core-list">
+          <li>Upload dataset</li>
+          <li>Automatic data validation</li>
+          <li>Select task type (Regression / Classification)</li>
+          <li>Preprocess data (cleaning, encoding, scaling, handling nulls)</li>
+          <li>Choose target variable (auto-detected)</li>
+          <li>System suggests suitable models</li>
+          <li>Train selected model(s)</li>
+          <li>View evaluation metrics and model comparison table</li>
+          <li>Visualize results (charts, confusion/residuals, SHAP)</li>
+          <li>Generate professional PDF report with recommendations</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- CREDITS -->
+    <section class="credits" role="contentinfo">
+      <div class="faculty">Guided by Dr. Juliet Rozario</div>
+
+      <!-- decorative divider -->
+      <div class="divider-line" aria-hidden="true"></div>
+
+      <div class="developed">Developed & Designed By</div>
+
+      <div class="students" aria-label="authors">
+        <span>Gopika C</span><span class="sep">|</span>
+        <span>Saranya M</span><span class="sep">|</span>
+        <span>Lakshmi Krishna S</span>
+      </div>
+    </section>
+
+  </main>
+
+  <footer style="background:#0f1724; color:#9aa6b6; padding:18px; text-align:center;">
+    © 2025 <span style="color:var(--mid-blue); font-weight:700;">DataMentor</span> — Intelligent Assistance for Data Understanding
+  </footer>
+
+  {% include 'chatbot_widget.html' %}
+</body>
+</html>

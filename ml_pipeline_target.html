@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .upload-card {
+        max-width: 900px;
+        margin: 60px auto;
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.10);
+    }
+
+    .step-header {
+        background: #60a5fa;
+        color: white;
+        padding: 18px;
+        font-size: 22px;
+        font-weight: 700;
+        border-radius: 14px 14px 0 0;
+        text-align: center;
+    }
+
+    .info-box {
+        background: #e8f3ff;
+        border-left: 6px solid #60a5fa;
+        padding: 18px 20px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        color: #1e3a8a;
+        font-size: 17px;
+        line-height: 1.6;
+    }
+
+    .btn-soft-blue {
+        background: #60a5fa;
+        color: white;
+        padding: 12px 18px;
+        border: none;
+        border-radius: 10px;
+        font-size: 17px;
+        width: 100%;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .btn-soft-blue:hover {
+        background: #3b82f6;
+    }
+</style>
+
+<div class="upload-card">
+
+    <div class="step-header">
+        Step 2 — Select Target Variable
+    </div>
+
+    <div class="p-4">
+
+        <div class="info-box">
+            Select the column you want the model to predict (<b>target variable</b>).<br>
+            Choose carefully — this decides whether the pipeline runs as
+            <b>Classification</b> or <b>Regression</b>.
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+
+            <label class="mt-2"><b>Choose Target Column</b></label>
+            <select name="target_column" class="form-control mt-2" required>
+                <option value="" disabled selected>-- Select Column --</option>
+                {% for col in columns %}
+                    <option value="{{ col }}">{{ col }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit" class="btn-soft-blue mt-4">
+                Continue →
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

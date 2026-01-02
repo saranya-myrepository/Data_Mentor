@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* =====================================================
+   GLOBAL TYPOGRAPHY — MATCH STEP 3
+===================================================== */
+.page-title {
+    font-size: 28px;           /* reduced from oversized */
+    font-weight: 800;
+    color: #1e3a8a;
+    margin-bottom: 22px;
+}
+
+.section-title {
+    font-size: 20px;           /* same as Step 3 cards */
+    font-weight: 700;
+    color: #1e40af;
+    margin-bottom: 12px;
+}
+
+.description-text {
+    font-size: 16px;           /* MATCH STEP 3 body text */
+    color: #374151;
+    line-height: 1.6;
+}
+
+/* =====================================================
+   CARD CONTAINER
+===================================================== */
+.card-box {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 26px;
+    margin-bottom: 28px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+/* =====================================================
+   BEST MODEL BADGE
+===================================================== */
+.best-model {
+    margin-top: 14px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 18px;     /* reduced */
+    font-weight: 700;
+    padding: 14px 18px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* =====================================================
+   TABLE
+===================================================== */
+.metrics-table th {
+    background: #e8f1ff;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.metrics-table td {
+    font-size: 15px;
+}
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+.action-btn {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 13px 20px;
+    font-size: 15px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.action-btn.secondary {
+    background: #64748b;
+}
+</style>
+
+<div class="container mt-4">
+
+    <!-- ================================================= -->
+    <!-- PAGE TITLE -->
+    <!-- ================================================= -->
+    <div class="page-title">
+        ML Pipeline — Step 4: Final Model Comparison & Insights
+    </div>
+
+    <!-- ================================================= -->
+    <!-- BEST MODEL -->
+    <!-- ================================================= -->
+    <div class="card-box">
+        <div class="section-title">Best Performing Model</div>
+
+        <div class="description-text">
+            After evaluating all selected models, the best model based on
+            <b>Accuracy / F1</b> is:
+        </div>
+
+        <div class="best-model">
+            ⭐ {{ best_model_name }}
+        </div>
+    </div>
+
+    <!-- ================================================= -->
+    <!-- PERFORMANCE METRICS TABLE -->
+    <!-- ================================================= -->
+    <div class="card-box">
+        <div class="section-title">Performance Metrics — Model Comparison</div>
+
+        <table class="table metrics-table mt-3">
+            <thead>
+                <tr>
+                    <th>Model</th>
+                    {% for metric in metric_table.values()|list|first %}
+                    <th>{{ metric.upper() }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for model, metrics in metric_table.items() %}
+                <tr>
+                    <td><b>{{ model }}</b></td>
+                    {% for val in metrics.values() %}
+                    <td>{{ "%.4f"|format(val) }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ================================================= -->
+    <!-- CONFUSION MATRIX -->
+    <!-- ================================================= -->
+    {% if confusion_html %}
+    <div class="card-box">
+        <div class="section-title">Confusion Matrix</div>
+        {{ confusion_html | safe }}
+    </div>
+    {% endif %}
+
+    <!-- ================================================= -->
+    <!-- RADAR COMPARISON -->
+    <!-- ================================================= -->
+    {% if radar_values %}
+    <div class="card-box">
+        <div class="section-title">Radar Comparison Across Selected Models</div>
+        <div class="description-text">
+            Normalized comparison of model performance across all evaluation metrics.
+        </div>
+        <div id="radarChart"></div>
+    </div>
+    {% endif %}
+
+    <!-- ================================================= -->
+    <!-- FEATURE IMPORTANCE -->
+    <!-- ================================================= -->
+    {% if feature_importance_html %}
+    <div class="card-box">
+        <div class="section-title">Feature Importance</div>
+        {{ feature_importance_html | safe }}
+    </div>
+    {% endif %}
+
+    <!-- ================================================= -->
+    <!-- SHAP EXPLAINABILITY -->
+    <!-- ================================================= -->
+    {% if shap_html %}
+    <div class="card-box">
+        <div class="section-title">Model Explainability (SHAP)</div>
+        {{ shap_html | safe }}
+    </div>
+    {% endif %}
+
+    <!-- ================================================= -->
+    <!-- ACTION BUTTONS -->
+    <!-- ================================================= -->
+    <div class="card-box text-center">
+        <form method="POST" action="/generate_report">
+            <button class="action-btn">
+                Download Full ML Report (PDF)
+            </button>
+        </form>
+
+        <a href="/ml_pipeline_model">
+            <button class="action-btn secondary mt-3">
+                ← Back to Model Selection
+            </button>
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

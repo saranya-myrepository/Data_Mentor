@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .upload-card {
+        max-width:900px;
+        margin:60px auto;
+        background:white;
+        border-radius:14px;
+        box-shadow:0 4px 18px rgba(0,0,0,0.10);
+    }
+
+    .step-header {
+        background:#60a5fa;
+        color:white;
+        padding:18px;
+        font-size:22px;
+        font-weight:700;
+        border-radius:14px 14px 0 0;
+        text-align:center;
+    }
+
+    .info-box {
+        background:#e8f3ff;
+        border-left:6px solid #60a5fa;
+        padding:18px 20px;
+        border-radius:10px;
+        margin-bottom:25px;
+        color:#1e3a8a;
+        font-size:17px;
+        line-height:1.6;
+    }
+
+    .btn-soft-blue {
+        background:#60a5fa;
+        color:white;
+        padding:12px 18px;
+        border:none;
+        border-radius:10px;
+        font-size:17px;
+        width:100%;
+        cursor:pointer;
+        font-weight:600;
+    }
+
+    .btn-soft-blue:hover {
+        background:#3b82f6;
+    }
+</style>
+
+
+<div class="upload-card">
+
+    <div class="step-header">
+        ML Pipeline — Step 1: Upload Preprocessed Dataset
+    </div>
+
+    <div class="p-4">
+
+        <div class="info-box">
+            <strong>Important:</strong><br>
+            ⚠️ Upload the <b>preprocessed CSV</b> generated from the Profiling section.<br>
+            → Go to “Dataset Profiling” → click <b>“Click here to download the preprocessed data”</b>.<br><br>
+            This ML Pipeline only accepts cleaned data because:<br>
+            • All missing values must already be handled<br>
+            • Outliers must be treated<br>
+            • Encodings should be consistent<br>
+            • Data must be ready for AutoML<br>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <form action="/ml_pipeline_upload" method="POST" enctype="multipart/form-data">
+
+            <label class="mt-2"><b>Select CSV File</b></label>
+            <input type="file" name="dataset" class="form-control" required style="padding:10px;">
+
+            <button type="submit" class="btn-soft-blue mt-4">
+                Continue →
+            </button>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
